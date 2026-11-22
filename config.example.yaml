@@ -1,0 +1,83 @@
+# castfetch configuration schema. Required; currently only 1 is supported.
+version: 1
+
+# Required: one root for all sources (each gets its own subfolder).
+# Paths expand ~. Relative paths resolve against THIS configuration file.
+# Existing transcripts are never overwritten or deleted.
+archive_root: ~/Documents/castfetch-archive
+
+# Optional: publisher transcript MIME types to download.
+# Default: [text/vtt, application/json]. Must be a non-empty list.
+# Also supported: text/plain, application/srt, application/x-subrip, text/srt.
+# A publisher offering other formats still blocks automatic local transcription.
+formats:
+  - text/vtt
+  - application/json
+
+# Optional: maximum bytes per feed/discovery response and publisher transcript.
+# Defaults: 52428800 (50 MiB) each. Positive integers only.
+max_feed_bytes: 52428800
+max_transcript_bytes: 52428800
+
+logging:
+  # Optional; default ~/.castfetch/runs. Kept outside the application install.
+  # Productive run/backfill commands create result.json + events.jsonl per run.
+  # Read-only commands and dry runs create no logs. No automatic log deletion.
+  directory: ~/.castfetch/runs
+
+# Optional shared settings used only when an eligible source transcribes locally.
+# MLX Whisper is external software; no remote transcription service is used.
+transcription:
+  # Required for local transcription: Python executable with mlx-whisper installed.
+  # Not needed for publisher-only sync, searching, or reading reports.
+  # This is a fictional example path; create your environment and adjust it.
+  python: ~/.venvs/castfetch-transcription/bin/python
+
+  # Optional model identifier; default shown. Downloaded by MLX on first use.
+  model: mlx-community/whisper-large-v3-turbo
+
+  # Optional model cache (HF_HOME). If omitted, the model library uses its default.
+  # This cache avoids downloading model weights again; it contains no episode audio.
+  cache_dir: ~/.cache/castfetch/models
+
+  # Optional positive byte limit per temporary media download. Default: 1 GiB.
+  max_audio_bytes: 1073741824
+
+# Required non-empty list. All examples are FICTIONAL and DISABLED.
+# Replace them with your sources and explicitly enable the ones you want.
+sources:
+  - id: my-podcast                 # Required: unique lowercase words, separated by -.
+    name: My Favorite Podcast      # Required: human-readable display name.
+    type: podcast                  # Required: podcast or instagram.
+    enabled: false                 # Optional boolean, default true.
+    feed_url: https://example.com/podcast/feed.xml  # Required direct HTTP(S) RSS/Atom feed.
+
+    # Optional; default publisher. Allowed: publisher or local.
+    # publisher: only download published transcripts.
+    # local: allow local transcription ONLY if the entire source offers no
+    # publisher transcripts (including archived publisher history).
+    # Missing/broken files from a publisher source never trigger audio fallback.
+    transcription: publisher
+
+    # Optional; default {days: 30}. Evaluated ONCE for this source's first sync.
+    # The resulting fixed UTC cutoff is saved. Later runs process deltas/retries.
+    # Changing this setting does not change stored coverage; use backfill.
+    # Allowed: all, or a mapping with one positive integer: {days: N}.
+    initial_sync:
+      days: 30
+
+  - id: my-video-series
+    name: My Favorite Video Series
+    type: instagram
+    enabled: false
+    username: example_account      # Required for Instagram; do not include @.
+    caption_contains: Example Series # Required series filter; case/accent/space insensitive.
+    transcription: local
+
+    # all means all discoverable history, not a complete Instagram account history.
+    # Instagram's public embed exposes a limited recent window; gaps are reported.
+    initial_sync: all
+
+    # Optional per-source language code (for example en or de).
+    # Omit for automatic language detection by Whisper.
+    language: en

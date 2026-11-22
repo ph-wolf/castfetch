@@ -1,0 +1,4 @@
+include config.example.yaml uv.lock
+recursive-include skill *.md
+recursive-include tests *.py
+recursive-include .github/workflows *.yml
