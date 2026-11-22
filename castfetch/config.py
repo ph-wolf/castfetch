@@ -1,5 +1,6 @@
 """One validated YAML configuration; no archive-specific setup or conversion."""
 
+import os
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -51,9 +52,11 @@ def positive(value, label):
     return value
 
 
-def resolve_path(value, base, label):
+def resolve_path(value, base, label, *, preserve_symlink=False):
     path = Path(text(value, label)).expanduser()
-    return (path if path.is_absolute() else base / path).resolve()
+    path = path if path.is_absolute() else base / path
+    # Invoking a venv's symlink is essential: its location selects pyvenv.cfg.
+    return Path(os.path.abspath(path)) if preserve_symlink else path.resolve()
 
 
 @dataclass(frozen=True)
@@ -134,7 +137,9 @@ def load(explicit=None):
     }
     for key in ("python", "cache_dir"):
         if key in raw:
-            settings[key] = str(resolve_path(raw[key], base, f"transcription.{key}"))
+            settings[key] = str(
+                resolve_path(raw[key], base, f"transcription.{key}", preserve_symlink=key == "python")
+            )
     formats = data.get("formats", ["text/vtt", "application/json"])
     supported = {
         "text/vtt",

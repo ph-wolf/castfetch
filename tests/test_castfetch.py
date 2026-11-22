@@ -69,6 +69,15 @@ sources:
 
 
 class ConfigTests(Fixture):
+    def test_python_symlink_keeps_virtual_environment_context(self):
+        interpreter = self.base / "venv" / "bin" / "python"
+        interpreter.parent.mkdir(parents=True)
+        interpreter.symlink_to("/bin/sh")
+        self.file.write_text(self.file.read_text() + f"\ntranscription:\n  python: {interpreter}\n")
+        cfg = config.load(self.file)
+        self.assertEqual(cfg.transcription["python"], str(interpreter))
+        self.assertNotEqual(cfg.transcription["python"], str(interpreter.resolve()))
+
     def test_relative_paths_and_defaults(self):
         self.assertEqual(self.cfg.archive_root, self.base / "archive")
         self.assertEqual(self.cfg.logging_directory, self.base / "logs")
