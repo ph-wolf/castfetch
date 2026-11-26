@@ -1,6 +1,6 @@
 ---
 name: castfetch
-description: Synchronize configured podcast and Instagram transcripts, inspect run reports, and answer questions using the local castfetch transcript archive.
+description: Synchronize configured podcast and Instagram transcripts, inspect run reports, and answer questions using the local castfetch transcript archive. Use when the user wants new podcast episodes or transcripts fetched, asks what was said about a topic, person or company in a podcast or Instagram video, wants quotes or timestamps from episodes, or asks how the last sync went; also for German requests such as "neue Folgen holen", "Transkripte aktualisieren", "was wurde im Podcast über … gesagt", "in welcher Folge ging es um …" or "wie lief der letzte Lauf".
 ---
 
 # castfetch
@@ -14,7 +14,8 @@ the installed example; do not invent personal sources or paths.
 
 ## Route the request
 
-- A bare `$castfetch` invocation, with no other task, means `castfetch run --json`.
+- A bare skill invocation (`/castfetch` in Claude Code, `$castfetch` in Codex),
+  with no other task, means `castfetch run --json`.
 - An explicit refresh/download/sync request also means `run`; preserve source
   restrictions. Report new files, local transcriptions, errors and coverage limits.
 - A content/context question means local research only. Do not sync first.
